@@ -1,0 +1,21 @@
+{
+  "version": "0.0.1",
+  "description": "Delightful file explorer for Google Drive",
+  "scripts": {
+    "build": "node utils/build.js",
+    "start": "NODE_ENV=development node utils/webserver.js"
+  },
+  "dependencies": {
+    "clean-webpack-plugin": "^1.0.0",
+    "copy-webpack-plugin": "^5.0.4",
+    "file-loader": "^4.2.0",
+    "googleapis": "^44.0.0",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "svelte": "^3.12.1",
+    "svelte-loader": "^2.13.6",
+    "webpack": "^4.41.2",
+    "webpack-dev-server": "^3.9.0",
+    "write-file-webpack-plugin": "^4.5.1"
+  }
+}
