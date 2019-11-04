@@ -270,7 +270,7 @@
   <div class='menu' class:menuVisible on:click={e => e.stopPropagation()} style="top: {menuY}px; left: {menuX}px">
     <div on:click={() => deleteFile(menuId)}>
       <svg viewBox="0 0 30 30" class="trash" style="width: 12px; height: 12px; display: block; fill: inherit; flex-shrink: 0; backface-visibility: hidden;"><path d="M21,5c0-2.2-1.8-4-4-4h-4c-2.2,0-4,1.8-4,4H2v2h2v22h22V7h2V5H21z M13,3h4c1.104,0,2,0.897,2,2h-8C11,3.897,11.897,3,13,3zM24,27H6V7h18V27z M16,11h-2v12h2V11z M20,11h-2v12h2V11z M12,11h-2v12h2V11z"></path></svg>
-      <span>Delete {menuFile.type} {menuFile.name}</span>
+      <span>Trash {menuFile.type} {menuFile.name}</span>
     </div>
     <div on:click={() => {copy(menuFile.webViewLink); menuVisible = false;}}>
       <svg viewBox="0 0 30 30" class="link" style="width: 17px; height: 17px; display: block; fill: inherit; flex-shrink: 0; backface-visibility: hidden;"><path d="M2,12c0-3.309,2.691-6,6-6h8c3.309,0,6,2.691,6,6s-2.691,6-6,6h-6c0,0.736,0.223,1.41,0.574,2H16c4.418,0,8-3.582,8-8 c0-4.418-3.582-8-8-8H8c-4.418,0-8,3.582-8,8c0,2.98,1.634,5.575,4.051,6.951C4.021,18.638,4,18.321,4,18 c0-0.488,0.046-0.967,0.115-1.436C2.823,15.462,2,13.827,2,12z M25.953,11.051C25.984,11.363,26,11.68,26,12 c0,0.489-0.047,0.965-0.117,1.434C27.176,14.536,28,16.172,28,18c0,3.309-2.691,6-6,6h-8c-3.309,0-6-2.691-6-6s2.691-6,6-6h6 c0-0.731-0.199-1.413-0.545-2H14c-4.418,0-8,3.582-8,8c0,4.418,3.582,8,8,8h8c4.418,0,8-3.582,8-8 C30,15.021,28.368,12.428,25.953,11.051z"></path></svg>
