@@ -100,9 +100,22 @@
     });
   }
 
-  async function getRoot() {
-    root = await getLocalRoot();
+  async function removeCachedAuthToken() {
+    const token = await oauthPromise;
+    return new Promise((resolve, reject) => chrome.identity.removeCachedAuthToken({token}, resolve));
+  }
+
+  async function getRoot(error) {
+    root = (await getLocalRoot()) || root;
     const resp = await getFilesInFolder('root');
+    if (resp.error) {
+      if (error) {
+        alert('Could not complete the Google OAuth process. Please msg tieshun.roquerre@gmail.com to debug.');
+        return;
+      }
+      await removeCachedAuthToken();
+      return getRoot(resp.error);
+    }
     const id = resp.files[0].parents[0];
     root = {id, files: buildTree(resp.files, id), loaded: true};
   }

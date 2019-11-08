@@ -1,4 +1,4 @@
-Drively - Delightful file explorer for Google Drive
+Drively - File explorer for Google Drive
 =============================
 
 [![Build Status](https://travis-ci.org/philc/vimium.svg?branch=master)](https://travis-ci.org/philc/vimium)
