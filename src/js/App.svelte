@@ -5,7 +5,7 @@
 
   let visibleDropdown;
   let menuX, menuY, menuId, menuVisible = false;
-  let root = {id: null, files: [], loaded: false};
+  let root = {id: 'root', files: [], loaded: false};
 
   function openContextMenu(e) {
     if (e.detail.id === root.id) return;
@@ -76,7 +76,11 @@
     return tree;
   }
 
-  async function getFilesInFolder(parent) {
+  function getFilesInFolder(parent) {
+    return getFilesInFolders([parent]);
+  }
+
+  async function getFilesInFolders(parents) {
     const token = await oauthPromise;
     const init = {
       method: 'GET',
@@ -88,7 +92,7 @@
       'contentType': 'json'
     };
     return (await fetch(
-      `https://www.googleapis.com/drive/v3/files?q="${parent}"%20in%20parents%20and%20trashed%3Dfalse&pageSize=1000&fields=files(id%2CmimeType%2Cparents%2CiconLink%2CwebViewLink%2Cname)`,
+      `https://www.googleapis.com/drive/v3/files?q=(${parents.map(parent => `"${parent}"%20in%20parents`).join('%20or%20')})%20and%20trashed%3Dfalse&pageSize=1000&fields=files(id%2CmimeType%2Cparents%2CiconLink%2CwebViewLink%2Cname)`,
       init)).json();
   }
 
@@ -105,6 +109,45 @@
     return new Promise((resolve, reject) => chrome.identity.removeCachedAuthToken({token}, resolve));
   }
 
+  async function updateRoot(currentRoot, resp) {
+    const id = resp.files[0].parents[0];
+    const r = {id, files: buildTree(resp.files, id), loaded: true};
+    const loaded = listLoaded(currentRoot).filter(fid => fid !== id);
+    const respForLoaded = await getFilesInFolders(loaded);
+    if (resp.error) {
+      alert('Google Drive API request failed. Please msg tieshun.roquerre@gmail.com to debug.');
+      return r;
+    }
+    const topLevel = loaded.filter(fid => findFile(fid, r));
+    const notTopLevel = loaded.filter(fid => !findFile(fid, r));
+    topLevel.forEach(fid => {
+      const folder = findFile(fid, r);
+      folder.files = buildTree(respForLoaded.files, fid);
+      folder.loaded = true;
+      folder.expanded = findFile(fid, currentRoot).expanded;
+    });
+    notTopLevel.forEach(fid => {
+      const folder = findFile(fid, r);
+      if (folder) {
+        folder.loaded = true;
+        folder.expanded = findFile(fid, currentRoot).expanded;
+      }
+    });
+    return r;
+  }
+
+  function listFolders(root) {
+    let folders = [root.id];
+    root.files.filter(f => f.files).forEach(f => folders = folders.concat(listFolders(f)));
+    return folders;
+  }
+
+  function listLoaded(root) {
+    let folders = [root.id];
+    root.files.filter(f => f.loaded).forEach(f => folders = folders.concat(listLoaded(f)));
+    return folders;
+  }
+
   async function getRoot(error) {
     root = (await getLocalRoot()) || root;
     const resp = await getFilesInFolder('root');
@@ -116,13 +159,13 @@
       await removeCachedAuthToken();
       return getRoot(resp.error);
     }
-    const id = resp.files[0].parents[0];
-    root = {id, files: buildTree(resp.files, id), loaded: true};
+    root = await updateRoot(root, resp);
   }
 
-  function findFile(id) {
+  function findFile(id, r) {
+    r = r || root;
     let stack = [];
-    stack.push(root);
+    stack.push(r);
 
     while (stack.length > 0) {
         let node = stack.pop();
@@ -276,7 +319,7 @@
 <svelte:window on:click={handleClick}/>
 
 <div class='container'>
-  <Folder {...root} iconLink='https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder+shared' name="My Drive" visibleDropdown={visibleDropdown} expanded on:expand={loadFolder} on:create={createFile} on:dropdown={openDropdown} on:contextmenu={openContextMenu}/>
+  <Folder {...root} iconLink='https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder+shared' name="My Drive1" visibleDropdown={visibleDropdown} expanded on:expand={loadFolder} on:create={createFile} on:dropdown={openDropdown} on:contextmenu={openContextMenu}/>
 </div>
 
 {#if menuVisible}

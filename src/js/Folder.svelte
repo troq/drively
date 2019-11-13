@@ -26,11 +26,11 @@
     transition: background 120ms ease-in 0s;
 	}
 
-  li:hover {
+  li:hover, .container:hover {
     background-color: rgba(55, 53, 47, 0.08);
   }
 
-  li:active:hover {
+  li:active:hover, .container:active:hover {
     background-color: rgba(55, 53, 47, 0.16);
   }
 
@@ -190,13 +190,13 @@
     {#if loaded}
       {#if files.length}
         {#each files as file}
-          <li>
-            {#if file.type === 'folder'}
-              <svelte:self on:create on:expand on:dropdown on:contextmenu visibleDropdown={visibleDropdown} {...file}/>
-            {:else}
+          {#if file.type === 'folder'}
+            <svelte:self on:create on:expand on:dropdown on:contextmenu visibleDropdown={visibleDropdown} {...file}/>
+          {:else}
+            <li>
               <File on:contextmenu {...file}/>
-            {/if}
-          </li>
+            </li>
+          {/if}
         {/each}
       {:else}
         <li>Empty</li>
