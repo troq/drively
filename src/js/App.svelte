@@ -319,7 +319,7 @@
 <svelte:window on:click={handleClick}/>
 
 <div class='container'>
-  <Folder {...root} iconLink='https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder+shared' name="My Drive1" visibleDropdown={visibleDropdown} expanded on:expand={loadFolder} on:create={createFile} on:dropdown={openDropdown} on:contextmenu={openContextMenu}/>
+  <Folder {...root} iconLink='https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder+shared' name="My Drive" visibleDropdown={visibleDropdown} expanded on:expand={loadFolder} on:create={createFile} on:dropdown={openDropdown} on:contextmenu={openContextMenu}/>
 </div>
 
 {#if menuVisible}
