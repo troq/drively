@@ -1,9 +1,11 @@
-submit to chrome store
-
 allow moving files to diff folders
+
+add manual sort mode
 
 navigate/ctrl with keyboard like in vim nerdtree
 
+
+submit to chrome store DONE
 
 open app with keyboard shortcut DONE
 
@@ -16,4 +18,3 @@ add right click menu to delete, duplicate, etc DONE
 persist state between sessions so that popup doesn't reset DONE
 
 use google icons DONE
-
