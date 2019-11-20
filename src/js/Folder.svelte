@@ -117,9 +117,7 @@
 
 	function toggle() {
 		expanded = !expanded;
-    if (expanded) {
-      dispatch('expand', {id});
-    }
+    dispatch('toggle', {id, expanded});
 	}
 
   function handleContextMenu(e) {
@@ -191,7 +189,7 @@
       {#if files.length}
         {#each files as file}
           {#if file.type === 'folder'}
-            <svelte:self on:create on:expand on:dropdown on:contextmenu visibleDropdown={visibleDropdown} {...file}/>
+            <svelte:self on:create on:toggle on:dropdown on:contextmenu visibleDropdown={visibleDropdown} {...file}/>
           {:else}
             <li>
               <File on:contextmenu {...file}/>

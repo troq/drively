@@ -109,11 +109,11 @@
     return new Promise((resolve, reject) => chrome.identity.removeCachedAuthToken({token}, resolve));
   }
 
-  async function updateRoot(currentRoot, resp) {
-    const id = resp.files[0].parents[0];
-    const r = {id, files: buildTree(resp.files, id), loaded: true};
+  async function updateRoot(currentRoot, files) {
+    const id = files[0].parents[0];
+    const r = {id, files: buildTree(files, id), loaded: true};
     const loaded = listLoaded(currentRoot).filter(fid => fid !== id);
-    const respForLoaded = await getFilesInFolders(loaded);
+    const resp = await getFilesInFolders(loaded);
     if (resp.error) {
       alert('Google Drive API request failed. Please msg tieshun.roquerre@gmail.com to debug.');
       return r;
@@ -122,7 +122,7 @@
     const notTopLevel = loaded.filter(fid => !findFile(fid, r));
     topLevel.forEach(fid => {
       const folder = findFile(fid, r);
-      folder.files = buildTree(respForLoaded.files, fid);
+      folder.files = buildTree(resp.files, fid);
       folder.loaded = true;
       folder.expanded = findFile(fid, currentRoot).expanded;
     });
@@ -159,7 +159,7 @@
       await removeCachedAuthToken();
       return getRoot(resp.error);
     }
-    root = await updateRoot(root, resp);
+    root = await updateRoot(root, resp.files);
   }
 
   function findFile(id, r) {
@@ -181,13 +181,15 @@
     return null;
   }
 
-  async function loadFolder(e) {
+  async function toggleFolder(e) {
     const folder = findFile(e.detail.id);
-    if (!folder || folder.loaded) return;
-    const resp = await getFilesInFolder(folder.id);
-    folder.files = buildTree(resp.files, folder.id);
-    folder.loaded = true;
-    folder.expanded = true;
+    if (!folder) return;
+    folder.expanded = e.detail.expanded;
+    if (!folder.loaded) {
+      const resp = await getFilesInFolder(folder.id);
+      folder.files = buildTree(resp.files, folder.id);
+      folder.loaded = true;
+    }
     root = root;
   }
 
@@ -319,7 +321,7 @@
 <svelte:window on:click={handleClick}/>
 
 <div class='container'>
-  <Folder {...root} iconLink='https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder+shared' name="My Drive" visibleDropdown={visibleDropdown} expanded on:expand={loadFolder} on:create={createFile} on:dropdown={openDropdown} on:contextmenu={openContextMenu}/>
+  <Folder {...root} iconLink='https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder+shared' name="My Drive" visibleDropdown={visibleDropdown} expanded on:toggle={toggleFolder} on:create={createFile} on:dropdown={openDropdown} on:contextmenu={openContextMenu}/>
 </div>
 
 {#if menuVisible}
