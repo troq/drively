@@ -2,7 +2,7 @@
   "version": "0.0.5",
   "description": "File explorer for Google Drive",
   "scripts": {
-    "build": "node utils/build.js",
+    "build": "rm build.zip && NODE_ENV=production node utils/build.js && ditto -c -k --sequesterRsrc --keepParent build build.zip",
     "start": "NODE_ENV=development node utils/webserver.js"
   },
   "dependencies": {
