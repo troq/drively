@@ -4,6 +4,9 @@ add manual sort mode
 
 navigate/ctrl with keyboard like in vim nerdtree
 
+fix bug where expanding an unloaded folder while initial update occurs gets wiped out
+* reason is that unloaded folders are reset from initial update bc state is completely separate
+
 
 submit to chrome store DONE
 
