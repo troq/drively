@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte';
 	import Folder from './Folder.svelte';
   import util from 'util';
   import copy from './copy.js';
@@ -100,6 +101,15 @@
     return new Promise((resolve, reject) => {
       chrome.storage.local.get(['root'], function(result) {
         resolve(result.root);
+      });
+    });
+  }
+
+  let y;
+  function getLastY() {
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.get(['y'], function(result) {
+        resolve(result.y);
       });
     });
   }
@@ -266,10 +276,15 @@
   $: menuFile = findFile(menuId);
 
   getRoot();
+  onMount(async () => {
+    window.scrollTo(0, await getLastY());
+	});
   $: chrome.storage.local.set({root}, function() {
     console.log('Updated root to:\n' + util.inspect(root, {showHidden: false, depth: null}));
   });
-
+  $: chrome.storage.local.set({y}, function() {
+    console.log(`Updated y to: ${y}`);
+  });
 </script>
 
 <style>
@@ -318,7 +333,7 @@
   }
 </style>
 
-<svelte:window on:click={handleClick}/>
+<svelte:window bind:scrollY={y} on:click={handleClick}/>
 
 <div class='container'>
   <Folder {...root} iconLink='https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder+shared' name="My Drive" visibleDropdown={visibleDropdown} expanded on:toggle={toggleFolder} on:create={createFile} on:dropdown={openDropdown} on:contextmenu={openContextMenu}/>
