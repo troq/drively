@@ -1,5 +1,5 @@
 {
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "File explorer for Google Drive",
   "scripts": {
     "build": "rm build.zip && NODE_ENV=production node utils/build.js && ditto -c -k --sequesterRsrc --keepParent build build.zip",

@@ -23,14 +23,15 @@
     user-select: none;
 	}
 
-  a {
+  span {
     color: rgba(25, 23, 17, 0.7);
     font-weight: 500;
     text-decoration: none;
     display: block;
+    cursor: pointer;
   }
 </style>
 
-<div on:contextmenu|preventDefault={handleContextMenu} style="background-image: url({iconLink})">
-  <a on:click={e => {if (webViewLink === '#') e.preventDefault();}} href={webViewLink} target='_blank'>{name}</a>
+<div draggable="true" on:contextmenu|preventDefault={handleContextMenu} style="background-image: url({iconLink})">
+  <span on:click={e => {if (webViewLink !== '#') window.open(webViewLink, '_blank');}} href={webViewLink} target='_blank'>{name}</span>
 </div>

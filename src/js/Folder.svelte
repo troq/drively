@@ -105,32 +105,17 @@
 
 	export let expanded = false;
   export let loaded=false;
+  export let isRoot=false;
 	export let name;
 	export let files;
   export let id;
   export let iconLink;
   export let visibleDropdown;
+  export let parentId;
 
   let dropdownVisible = false;
 
 	const dispatch = createEventDispatcher();
-
-	function toggle() {
-		expanded = !expanded;
-    dispatch('toggle', {id, expanded});
-	}
-
-  function handleContextMenu(e) {
-    dispatch('contextmenu', {id, clientX: e.clientX, clientY: e.clientY});
-  }
-
-  function handleDropdown() {
-    dispatch('dropdown', {id});
-  }
-
-  function handleCreate(type) {
-    dispatch('create', {id, type});
-  }
 
   const types = [
     {
@@ -159,48 +144,98 @@
       mimeType: 'application/vnd.google-apps.folder',
     },
   ]
+
+	function toggle() {
+		expanded = !expanded;
+    dispatch('toggle', {id, expanded});
+	}
+
+  function handleContextMenu(e) {
+    dispatch('contextmenu', {id, clientX: e.clientX, clientY: e.clientY});
+  }
+
+  function handleDropdown() {
+    dispatch('dropdown', {id});
+  }
+
+  function handleCreate(type) {
+    dispatch('create', {id, type});
+  }
+
+  function dragstart(e, fid) {
+    e.dataTransfer.setData('id', fid);
+    e.dataTransfer.setData('pid', fid === id? parentId : id);
+  }
+
+  let dragover = false;
+  function dragenter(e) {
+    dragover = true;
+    dispatch('dragenter');
+  }
+  function handleDragover(e) {
+    e.dataTransfer.dropEffect = 'move';
+  }
+  function handleChildDragenter() {
+    dragover = false;
+    dispatch('dragenter');
+  }
+  function drop(e) {
+    dragover=false;
+    const fid = e.dataTransfer.getData('id');
+    const pid = e.dataTransfer.getData('pid');
+    dispatch('movefile', {id, fid, pid});
+  }
+  function dragleave(e) {
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    dragover = false;
+  }
 </script>
 
-<div class='container' on:contextmenu|preventDefault={handleContextMenu}>
-  <span class='folder' style='background-image: url({iconLink})' on:click={toggle}>{name}</span>
-  <div class='addFileBtn' on:click|stopPropagation={handleDropdown}>
-      <svg viewBox="0 0 18 18" class="plus" style="width: 10px; height: 10px; display: block; flex-shrink: 0; backface-visibility: hidden;"><polygon points="17,8 10,8 10,1 8,1 8,8 1,8 1,10 8,10 8,17 10,17 10,10 17,10 "></polygon></svg>
-    <div style="position: relative">
-      {#if visibleDropdown === id}
-        <div class='dropdown'>
-          <ul>
-            {#each types as type}
-              <li on:click={() => handleCreate(type)}>
-                <div style="background-image: url({type.iconLink})">
-                  {type.name}
-                </div>
-              </li>
-            {/each}
-          </ul>
-        </div>
-      {/if}
+<div on:drop|stopPropagation={drop} on:dragover|preventDefault={handleDragover} on:dragenter|stopPropagation={dragenter} on:dragleave={dragleave} style="position: relative">
+  <div class='container' draggable={!isRoot} on:dragstart={e => dragstart(e, id)} on:contextmenu|preventDefault={handleContextMenu}>
+    <span class='folder' style='background-image: url({iconLink})' on:click={toggle}>{name}</span>
+    <div class='addFileBtn' on:click|stopPropagation={handleDropdown}>
+        <svg viewBox="0 0 18 18" class="plus" style="width: 10px; height: 10px; display: block; flex-shrink: 0; backface-visibility: hidden;"><polygon points="17,8 10,8 10,1 8,1 8,8 1,8 1,10 8,10 8,17 10,17 10,10 17,10 "></polygon></svg>
+      <div style="position: relative">
+        {#if visibleDropdown === id}
+          <div class='dropdown'>
+            <ul>
+              {#each types as type}
+                <li on:click={() => handleCreate(type)}>
+                  <div style="background-image: url({type.iconLink})">
+                    {type.name}
+                  </div>
+                </li>
+              {/each}
+            </ul>
+          </div>
+        {/if}
+      </div>
     </div>
   </div>
-</div>
 
-{#if expanded}
-	<ul>
-    {#if loaded}
-      {#if files.length}
-        {#each files as file}
-          {#if file.type === 'folder'}
-            <svelte:self on:create on:toggle on:dropdown on:contextmenu visibleDropdown={visibleDropdown} {...file}/>
-          {:else}
-            <li>
-              <File on:contextmenu {...file}/>
-            </li>
-          {/if}
-        {/each}
+  {#if expanded}
+    <ul>
+      {#if loaded}
+        {#if files.length}
+          {#each files as file (file.id)}
+            {#if file.type === 'folder'}
+              <svelte:self on:dragenter={handleChildDragenter} on:movefile on:create on:toggle on:dropdown on:contextmenu visibleDropdown={visibleDropdown} {...file} parentId={id}/>
+            {:else}
+              <li draggable={true} on:dragstart={e => dragstart(e, file.id)}>
+                <File on:contextmenu {...file}/>
+              </li>
+            {/if}
+          {/each}
+        {:else}
+          <li>Empty</li>
+        {/if}
       {:else}
-        <li>Empty</li>
+        <li>Loading</li>
       {/if}
-    {:else}
-      <li>Loading</li>
-    {/if}
-	</ul>
-{/if}
+    </ul>
+  {/if}
+  {#if dragover}
+    <div style="position: absolute; pointer-events: none; background: rgba(46, 170, 220, 0.3); z-index: 88; left: 0px; top: 0px; right: 0px; bottom: 0px; opacity: 1;"></div>
+  {/if}
+</div>

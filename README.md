@@ -8,6 +8,7 @@ Drively is a file explorer for Google Drive written in [Svelte](https://svelte.d
 - Browse and open files in one click
 - Quickly create Docs, Sheets, Slides, Forms, and Folders in any location (My Drive, subfolders, etc)
 - Right click any file/folder to copy its address or delete it
+- Drag and drop files/folders to move them
 
 *NOTE* Drively uses [chrome.identity](https://developer.chrome.com/apps/identity) to access your Google Drive. It never talks to any servers and does absolutely nothing with your data. Read the source code if you're curious.
 

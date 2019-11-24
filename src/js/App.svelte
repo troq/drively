@@ -205,10 +205,10 @@
 
   async function deleteFile(id) {
     const file = findFile(id);
-    const parent = findFile(file.parents[0]);
+    const parents = file.parents.map(id => findFile(id));
 
-    const oldFiles = parent.files;
-    parent.files = parent.files.filter(f => f.id !== id);
+    const oldFiles = parents.map(p => p.files);
+    parents.forEach(parent => parent.files = parent.files.filter(f => f.id !== file.id));
     menuVisible = false;
     root = root;
 
@@ -228,7 +228,47 @@
       init);
     if (!resp.ok) {
       alert(`Could not trash file ${file.name} with id ${id}`);
+      for (let i = 0; i < parents.length; i++) {
+        parents[i].files = oldFiles[i];
+      }
+      root = root;
+    }
+  }
+
+  async function moveFile(e) {
+    const file = findFile(e.detail.fid);
+    const newParent = findFile(e.detail.id);
+    if (file.parents.includes(newParent.id)) return;
+    const parent = findFile(e.detail.pid);
+
+    const oldFiles = parent.files;
+    parent.files = parent.files.filter(f => f.id !== file.id);
+    menuVisible = false;
+    newParent.files.unshift(file);
+    file.parents = file.parents.filter(pid => pid !== parent.id);
+    file.parents.push(newParent.id);
+    root = root;
+
+    const token = await oauthPromise;
+    const init = {
+      method: 'PATCH',
+      async: true,
+      headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json'
+      },
+      contentType: 'json',
+      body: JSON.stringify({})
+    };
+    const resp = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${file.id}?addParents=${newParent.id}&removeParents=${parent.id}`,
+      init);
+    if (!resp.ok) {
+      alert(`Could not move file ${file.name} to ${newParent.name}`);
       parent.files = oldFiles;
+      newParent.files.shift();
+      file.parents = file.parents.filter(pid => pid !== newParent.id);
+      file.parents.push(parent.id);
       root = root;
     }
   }
@@ -336,7 +376,7 @@
 <svelte:window bind:scrollY={y} on:click={handleClick}/>
 
 <div class='container'>
-  <Folder {...root} iconLink='https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder+shared' name="My Drive" visibleDropdown={visibleDropdown} expanded on:toggle={toggleFolder} on:create={createFile} on:dropdown={openDropdown} on:contextmenu={openContextMenu}/>
+  <Folder isRoot={true} {...root} iconLink='https://drive-thirdparty.googleusercontent.com/16/type/application/vnd.google-apps.folder+shared' name="My Drive" visibleDropdown={visibleDropdown} expanded on:toggle={toggleFolder} on:movefile={moveFile} on:create={createFile} on:dropdown={openDropdown} on:contextmenu={openContextMenu}/>
 </div>
 
 {#if menuVisible}

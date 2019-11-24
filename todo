@@ -1,12 +1,16 @@
-allow moving files to diff folders
+add ability to rename
 
 add manual sort mode
 
 navigate/ctrl with keyboard like in vim nerdtree
 
+enter folder like in nerdtree
+
 fix bug where expanding an unloaded folder while initial update occurs gets wiped out
 * reason is that unloaded folders are reset from initial update bc state is completely separate
 
+
+allow moving files to diff folders DONE
 
 submit to chrome store DONE
 
